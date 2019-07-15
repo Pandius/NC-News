@@ -144,4 +144,39 @@ describe('makeRefObj', () => {
   });
 });
 
-describe('formatComments', () => {});
+describe('formatComments', () => {
+  it('returns and empty array when and empty array and empty object is passed', () => {
+    const commentData = [];
+    const articleRef = {};
+    const actual = formatComments(commentData, articleRef);
+    const expected = [];
+    expect(actual).to.eql(expected);
+  });
+  it('returns and new array of formated comments for passed array of single comments object and reference object', () => {
+    const commentData = [
+      {
+        comments_id: 1,
+        body:
+          'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
+        belongs_to: 'sense of Redux',
+        created_by: 'butter_bridge',
+        votes: 14,
+        created_at: 1479818163389
+      }
+    ];
+    const articleRef = {'sense of Redux': 3};
+    const actual = formatComments(commentData, articleRef);
+    const expected = [
+      {
+        comments_id: 1,
+        body:
+          'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.',
+        article_id: 3,
+        author: 'butter_bridge',
+        votes: 14,
+        created_at: new Date(1479818163389)
+      }
+    ];
+    expect(actual).to.eql(expected);
+  });
+});
