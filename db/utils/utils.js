@@ -1,7 +1,8 @@
 exports.formatDate = list => {
-  return list.map(Element => {
-    const newObj = {...Element};
-    const date = new Date(Element.created_at).toLocaleString();
+  return list.map(element => {
+    const newObj = {...element};
+
+    const date = new Date(element.created_at);
     newObj.created_at = date;
     return newObj;
   });
