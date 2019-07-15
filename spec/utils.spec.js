@@ -104,6 +104,44 @@ describe('formatDate', () => {
   });
 });
 
-describe('makeRefObj', () => {});
+describe('makeRefObj', () => {
+  it('returns and object for passed array', () => {
+    expect(makeRefObj([])).to.eql({});
+  });
+  it('returns an reference object keyed by  item title for passed array with one object', () => {
+    expect(
+      makeRefObj([
+        {
+          article_id: 1,
+          title: 'Making sense of Redux'
+        }
+      ])
+    ).to.eql({
+      'Making sense of Redux': 1
+    });
+  });
+  it('returns an reference object keyed by each items title for passed array with multiple objects', () => {
+    expect(
+      makeRefObj([
+        {
+          article_id: 1,
+          title: 'Making sense of Redux'
+        },
+        {
+          article_id: 2,
+          title: 'Making sense'
+        },
+        {
+          article_id: 3,
+          title: 'sense of Redux'
+        }
+      ])
+    ).to.eql({
+      'Making sense': 2,
+      'Making sense of Redux': 1,
+      'sense of Redux': 3
+    });
+  });
+});
 
 describe('formatComments', () => {});
