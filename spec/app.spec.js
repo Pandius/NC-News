@@ -19,4 +19,17 @@ describe('/*', () => {
         });
     });
   });
+  describe('/users', () => {
+    describe('/users/:username', () => {
+      it(' GET status 200, returns an user by his username', () => {
+        return request(app)
+          .get('/api/users/rogersop')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.user.username).to.be.equal('rogersop');
+            expect(body.user).to.have.keys('username', 'avatar_url', 'name');
+          });
+      });
+    });
+  });
 });
