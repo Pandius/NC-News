@@ -30,6 +30,14 @@ describe('/*', () => {
             expect(body.user).to.have.keys('username', 'avatar_url', 'name');
           });
       });
+      it(' GET status 404, for valid but non existing user', () => {
+        return request(app)
+          .get('/api/users/nousername')
+          .expect(404)
+          .then(({body}) => {
+            expect(body.msg).to.be.equal('user doesn`t exists');
+          });
+      });
     });
   });
 });
