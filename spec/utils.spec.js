@@ -179,4 +179,35 @@ describe('formatComments', () => {
     ];
     expect(actual).to.eql(expected);
   });
+  it('returns array with multiply object with changed key value pairs, when array with multiply objects is passed', () => {
+    const comments = [
+      {
+        body:
+          'Itaque quisquam est similique et est perspiciatis reprehenderit voluptatem autem. Voluptatem accusantium eius error adipisci quibusdam doloribus.',
+        belongs_to:
+          'The People Tracking Every Touch, Pass And Tackle in the World Cup',
+        created_by: 'tickle122',
+        votes: -1,
+        created_at: 1468087638932
+      },
+      {
+        body: 'Nobis consequatur animi. Ullam nobis quaerat voluptates veniam.',
+        belongs_to: 'Making sense of Redux',
+        created_by: 'grumpy19',
+        votes: 7,
+        created_at: 1478813209256
+      }
+    ];
+    const articleRef = {
+      'The People Tracking Every Touch, Pass And Tackle in the World Cup': 1,
+      'Making sense of Redux': 2
+    };
+    const actual = formatComments(comments, articleRef);
+    expect(actual[0].created_at).to.be.eql(new Date(1468087638932));
+    expect(actual[1].created_at).to.be.eql(new Date(1478813209256));
+    expect(actual[0].author).to.be.equal('tickle122');
+    expect(actual[1].author).to.be.equal('grumpy19');
+    expect(actual[0].article_id).to.be.equal(1);
+    expect(actual[1].article_id).to.be.equal(2);
+  });
 });
