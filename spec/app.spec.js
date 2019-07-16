@@ -15,6 +15,7 @@ describe('/*', () => {
         .expect(200)
         .then(({body}) => {
           expect(body.topics).to.be.an('Array');
+          expect(body.topics[0]).to.have.keys('slug', 'description');
         });
     });
   });
