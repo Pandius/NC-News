@@ -77,6 +77,22 @@ describe('/*', () => {
             expect(body.article[0].votes).to.equal(1);
           });
       });
+      it('POST status 201, returns an posted comment', () => {
+        return request(app)
+          .post('/api/articles/2/comments')
+          .send({
+            username: 'lurker',
+            body: 'this is new comment'
+          })
+          .expect(201)
+          .then(({body}) => {
+            expect(body.comment[0].comment_id).to.equal(19);
+            expect(body.comment[0].author).to.equal('lurker');
+            expect(body.comment[0].article_id).to.equal(2);
+            expect(body.comment[0].votes).to.equal(0);
+            expect(body.comment[0].body).to.equal('this is new comment');
+          });
+      });
     });
   });
 });
