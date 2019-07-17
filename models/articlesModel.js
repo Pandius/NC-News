@@ -10,11 +10,10 @@ exports.fetchArticleById = article_id => {
     .where('articles.article_id', article_id)
     .then(article => {
       if (!article) {
-        return Promise.reject({
-          status: 404,
-          msg: 'Article not found.'
-        });
-      } else return article;
+        return Promise.reject({status: 404, msg: 'article not found'});
+      } else {
+        return article;
+      }
     });
 };
 
