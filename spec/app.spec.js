@@ -93,7 +93,7 @@ describe('/*', () => {
             });
         });
         it('Method not allowed: status 405 for /articles/:article_id', () => {
-          const invalidMethods = ['patch', 'put', 'post', 'delete'];
+          const invalidMethods = ['put', 'post', 'delete'];
           const methodPromises = invalidMethods.map(method => {
             return request(app)
               [method]('/api/articles/1')

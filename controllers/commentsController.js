@@ -7,5 +7,5 @@ exports.sendPostComment = (req, res, next) => {
     .then(comment => {
       res.status(201).send({comment});
     })
-    .catch(console.log);
+    .catch(next);
 };
