@@ -159,6 +159,48 @@ describe('/*', () => {
               expect(body.msg).to.equal('article not found');
             });
         });
+        it('PATCH status 400 responds with status code 400, when passed an article_id in an invalid format', () => {
+          return request(app)
+            .patch('/api/articles/notanarticle')
+            .send({
+              inc_votes: 12
+            })
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Invalid article id');
+            });
+        });
+        it('PATCH responds with status code 400, when passed a vote object in an invalid format', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({
+              inc_votes: 'not a number'
+            })
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Invalid article id');
+            });
+        });
+        it('PATCH restponds with code 200, ignores any extra item passed in the body', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({inc_votes: -40, pet: 'cat'})
+            .expect(200)
+            .then(({body}) => {
+              expect(body.article[0].votes).to.equal(60);
+            });
+        });
+        it('PATCH responds with status code 200 and returns an unchanged article, when passed a vote object with an invalid key', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({
+              some_key: 666
+            })
+            .expect(200)
+            .then(({body}) => {
+              expect(body.article[0].votes).to.eql(100);
+            });
+        });
         it('POST status 201, returns an posted comment', () => {
           return request(app)
             .post('/api/articles/2/comments')
