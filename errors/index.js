@@ -20,3 +20,12 @@ exports.handleCustomErrors = (err, req, res, next) => {
     res.status(err.status).send({msg: err.msg || 'Something went wrong'});
   } else next(err);
 };
+
+exports.handleNotFoundSqlErrors = (err, req, res, next) => {
+  const sqlErrorCodes = {
+    '23503': 'Not found'
+  };
+  if (sqlErrorCodes[err.code]) {
+    res.status(404).send({msg: sqlErrorCodes[err.code]});
+  } else next(err);
+};

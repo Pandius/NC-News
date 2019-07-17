@@ -217,6 +217,55 @@ describe('/*', () => {
               expect(body.comment[0].body).to.equal('this is new comment');
             });
         });
+        it('POST status 400, empty object - nothing to post', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({})
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('No data to post!');
+            });
+        });
+        it('POST status 400, invalid username and nothing to post', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({username: 'invalidUsername'})
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('No data to post!');
+            });
+        });
+        it('POST status 400, invalid username but comment to post', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({username: 'invalidUsername', body: 'comment'})
+            .expect(404)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Not found');
+            });
+        });
+        it('POST status 400, valid username but nothing to post', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({username: 'lurker'})
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal('No data to post!');
+            });
+        });
+        it('POST: status 404, returns an error if a non-existent article_id is used', () => {
+          return request(app)
+            .post('/api/articles/1999/comments')
+            .send({
+              body:
+                'I have a controvertial opinion regarding the subject matter of this article',
+              username: 'butter_bridge'
+            })
+            .expect(404)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Not found');
+            });
+        });
       });
     });
   });
