@@ -17,6 +17,18 @@ describe('/*', () => {
       });
   });
   describe('/api', () => {
+    it('Method not allowed: status 405 for /topics', () => {
+      const invalidMethods = ['patch', 'put', 'post', 'delete'];
+      const methodPromises = invalidMethods.map(method => {
+        return request(app)
+          [method]('/api')
+          .expect(405)
+          .then(({body}) => {
+            expect(body.msg).to.equal('Method not allowed');
+          });
+      });
+      return Promise.all(methodPromises);
+    });
     describe('/topics', () => {
       it('GET status 200, returns an array of topics objects', () => {
         return request(app)
@@ -136,6 +148,15 @@ describe('/*', () => {
                 'created_at'
               );
               expect(body.article[0].votes).to.equal(1);
+            });
+        });
+        it('PATCH status 404, patching article with valid id  that doesnt exists', () => {
+          return request(app)
+            .patch('/api/articles/12345667')
+            .send({inc_votes: 10})
+            .expect(404)
+            .then(({body}) => {
+              expect(body.msg).to.equal('article not found');
             });
         });
         it('POST status 201, returns an posted comment', () => {
