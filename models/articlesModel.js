@@ -17,3 +17,11 @@ exports.fetchArticleById = article_id => {
       } else return article;
     });
 };
+
+exports.updateArticle = (article_id, points) => {
+  return connection
+    .increment('votes', points.inc_votes || 0)
+    .into('articles')
+    .where('article_id', '=', article_id)
+    .returning('*');
+};
