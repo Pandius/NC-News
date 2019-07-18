@@ -431,7 +431,79 @@ describe('/*', () => {
         });
       });
       describe('/comments', () => {
-        describe('/comments/:comment_id', () => {});
+        describe('/comments/:comment_id', () => {
+          it('PATCH status 200, returns updated comment', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({inc_votes: 1})
+              .expect(200)
+              .then(({body}) => {
+                expect(body.comment.votes).to.equal(17);
+              });
+          });
+          it('Method not allowed: status 405 for /comments/comments_id', () => {
+            const invalidMethods = ['get', 'put', 'post'];
+            const methodPromises = invalidMethods.map(method => {
+              return request(app)
+                [method]('/api/comments/1')
+                .expect(405)
+                .then(({body}) => {
+                  expect(body.msg).to.equal('Method not allowed');
+                });
+            });
+            return Promise.all(methodPromises);
+          });
+          it('PATCH: 200, decrements the vote count by the stated number', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({inc_votes: -2})
+              .expect(200)
+              .then(({body}) => {
+                expect(body.comment.votes).to.equal(14);
+              });
+          });
+          it('PATCH: status 200, ignores any additional element passed in through the body', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({inc_votes: 1, pet: 'cat'})
+              .expect(200)
+              .then(({body}) => {
+                expect(body.comment.votes).to.equal(17);
+              });
+          });
+          it('PATCH: status 400, returns an error where no inc_votes value is provided', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({})
+              .expect(400)
+              .then(({body}) => {
+                expect(body.msg).to.equal(
+                  'Bad request - votes needs to be a number'
+                );
+              });
+          });
+          it('PATCH: status 400, returns an error where an invalid inc_votes value is provided', () => {
+            return request(app)
+              .patch('/api/comments/1')
+              .send({inc_votes: 'hello'})
+              .expect(400)
+              .then(({body}) => {
+                expect(body.msg).to.equal(
+                  'Bad request - votes needs to be a number'
+                );
+              });
+          });
+          it('PATCH: status 404, returns an error if provided a comment_id that does not exist', () => {
+            return request(app)
+              .patch('/api/comments/99')
+              .send({inc_votes: 5})
+
+              .expect(404)
+              .then(({body}) => {
+                expect(body.msg).to.equal('comment Id not found');
+              });
+          });
+        });
       });
     });
   });

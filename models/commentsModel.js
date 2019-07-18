@@ -33,3 +33,27 @@ exports.fetchComments = (article_id, sort_by) => {
       }
     });
 };
+
+exports.updateComment = (id, votes) => {
+  if (isNaN(votes)) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Bad request - votes needs to be a number'
+    });
+  } else {
+    return connection
+      .first('*')
+      .where('comment_id', id)
+      .increment('votes', votes)
+      .returning('*')
+      .from('comments')
+      .then(([comment]) => {
+        if (!comment) {
+          return Promise.reject({
+            status: 404,
+            msg: 'comment Id not found'
+          });
+        } else return comment;
+      });
+  }
+};
