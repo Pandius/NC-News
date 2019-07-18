@@ -88,14 +88,142 @@ describe('/*', () => {
         it(' GET status 400, for invalid username', () => {
           return request(app)
             .get('/api/users/99909')
-            .expect(404)
+            .expect(400)
             .then(({body}) => {
-              expect(body.msg).to.be.equal('user doesnt exists');
+              expect(body.msg).to.be.equal('Bad request');
             });
         });
       });
     });
     describe('/articles', () => {
+      it('GET: status 200, gets all articles, sorting them by date and in descending order by default', () => {
+        return request(app)
+          .get('/api/articles')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.articles).to.be.an('array');
+            expect(body.articles[0]).to.contain.keys(
+              'article_id',
+              'title',
+              'comment_count',
+              'votes',
+              'topic',
+              'author',
+              'created_at'
+            );
+            expect(body.articles).to.be.descendingBy('created_at');
+          });
+      });
+      it('GET status 200, gets all articles, sorted when provided sort method by query', () => {
+        return request(app)
+          .get('/api/articles?sort_by=title')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.articles).to.be.descendingBy('title');
+          });
+      });
+      it('Method not allowed: status 405 for /articles', () => {
+        const invalidMethods = ['patch', 'put', 'post', 'delete'];
+        const methodPromises = invalidMethods.map(method => {
+          return request(app)
+            [method]('/api/articles')
+            .expect(405)
+            .then(({body}) => {
+              expect(body.msg).to.equal('Method not allowed');
+            });
+        });
+        return Promise.all(methodPromises);
+      });
+      it('GET status 200, respond with array of article objects, with queries like- sort by created_at-ascending and filtered by author', () => {
+        return request(app)
+          .get(
+            '/api/articles?sort_by=created_at&order=asc&author=icellusedkars'
+          )
+          .expect(200)
+          .then(res => {
+            expect(res.body.articles).to.be.an('array');
+            expect(res.body.articles[0].author).to.equal('icellusedkars');
+            expect(res.body.articles[1].author).to.equal('icellusedkars');
+            expect(res.body.articles[2].author).to.equal('icellusedkars');
+            expect(res.body.articles).to.be.ascendingBy('created_at');
+          });
+      });
+      it('GET status 200, respond with array of article objects, accept queries sort by body-descending, filter by topic', () => {
+        return request(app)
+          .get('/api/articles?sort_by=created_at&order=desc&topic=mitch')
+          .expect(200)
+          .then(res => {
+            expect(res.body.articles).to.be.an('array');
+            expect(res.body.articles[0].topic).to.equal('mitch');
+            expect(res.body.articles[1].topic).to.equal('mitch');
+            expect(res.body.articles[2].topic).to.equal('mitch');
+            expect(res.body.articles).to.be.descendingBy('created_at');
+          });
+      });
+      it('GET status 200, gets all articles, sorted in ascending order when provided that query', () => {
+        return request(app)
+          .get('/api/articles?order=asc')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.articles).to.be.ascendingBy('created_at');
+          });
+      });
+      it('GET status 200, responds with all articles, filtered by  author', () => {
+        return request(app)
+          .get('/api/articles?author=butter_bridge')
+          .expect(200)
+          .then(({body}) => {
+            expect(body.articles).to.be.descendingBy('author');
+          });
+      });
+      it('GET status 404, when passing valid id, but doesnt exist in database', () => {
+        return request(app)
+          .get('/api/articles/12345678')
+          .expect(404)
+          .then(({body}) => {
+            expect(body.msg).to.equal('article not found');
+          });
+      });
+      it('GET status 400 - bad request, when passing invalid id, ie string', () => {
+        return request(app)
+          .get('/api/articles/not-a-valid-id')
+          .expect(400)
+          .then(({body}) => {
+            expect(body.msg).to.equal('Invalid article id');
+          });
+      });
+      it('GET status 400, gets an error if invalid sort_by value', () => {
+        return request(app)
+          .get('/api/articles?sort_by=not-a-column')
+          .expect(400)
+          .then(({body}) => {
+            expect(body.msg).to.equal('invalid sort by value');
+          });
+      });
+      it('GET status 404, gets an error if  invalid author', () => {
+        return request(app)
+          .get('/api/articles?author=no-one')
+          .expect(404)
+          .then(({body}) => {
+            expect(body.msg).to.equal('Author not found');
+          });
+      });
+      it('GET status 404, gets an error if  invalid topic', () => {
+        return request(app)
+          .get('/api/articles?topic=nothing')
+          .expect(404)
+          .then(({body}) => {
+            expect(body.msg).to.equal('Topic not found');
+          });
+      });
+      it('GET status 400, gets an error with an invalid sort_by value', () => {
+        return request(app)
+          .get('/api/articles?order=invalid-order')
+          .expect(400)
+          .then(({body}) => {
+            expect(body.msg).to.equal('invalid order value');
+          });
+      });
       describe('/articles/articles_id', () => {
         it('GET status 200, returns an article by article id', () => {
           return request(app)
@@ -288,7 +416,7 @@ describe('/*', () => {
               expect(body.msg).to.equal('No data to post!');
             });
         });
-        it('POST: status 404, returns an error if a non-existent article_id is used', () => {
+        it('POST status 404, returns an error if a non-existent article_id is used', () => {
           return request(app)
             .post('/api/articles/1999/comments')
             .send({
@@ -301,6 +429,9 @@ describe('/*', () => {
               expect(body.msg).to.equal('Not found');
             });
         });
+      });
+      describe('/comments', () => {
+        describe('/comments/:comment_id', () => {});
       });
     });
   });

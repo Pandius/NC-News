@@ -31,3 +31,46 @@ exports.updateArticle = (article_id, points) => {
       }
     });
 };
+
+exports.fetchAllArticles = (
+  sort_by = 'created_at',
+  order = 'desc',
+  author,
+  topic
+) => {
+  return connection
+    .select('articles.*')
+    .count('comments.comment_id as comment_count')
+    .from('articles')
+    .leftJoin('comments', 'comments.article_id', 'articles.article_id')
+    .groupBy('articles.article_id')
+    .orderBy(sort_by, order)
+    .modify(function(queryBuilder) {
+      if (author && topic) {
+        queryBuilder.where('articles.author', author);
+      } else if (author) {
+        queryBuilder.where('articles.author', author);
+      } else if (topic) {
+        queryBuilder.where('articles.topic', topic);
+      }
+    })
+    .then(article => {
+      if (!article) {
+        return Promise.reject({
+          status: 404,
+          msg: 'Article not found'
+        });
+      } else return article;
+    });
+};
+
+exports.checkExists = (queryValue, table, column) => {
+  return connection
+    .select('*')
+    .from(table)
+    .where(column, queryValue)
+    .then(row => {
+      if (row.length === 0) return false;
+      else return true;
+    });
+};

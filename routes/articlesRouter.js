@@ -1,7 +1,8 @@
 const articlesRouter = require('express').Router();
 const {
   sendArticleById,
-  sendUpdateArticle
+  sendUpdateArticle,
+  sendAllArticles
 } = require('../controllers/articlesController');
 const {MethodNotAllowed} = require('../errors/index');
 
@@ -10,6 +11,10 @@ const {
   sendAllComments
 } = require('../controllers/commentsController');
 
+articlesRouter
+  .route('/')
+  .get(sendAllArticles)
+  .all(MethodNotAllowed);
 articlesRouter
   .route('/:article_id')
   .get(sendArticleById)
