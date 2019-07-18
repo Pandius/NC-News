@@ -503,6 +503,19 @@ describe('/*', () => {
                 expect(body.msg).to.equal('comment Id not found');
               });
           });
+          it('DELETE status 204', () => {
+            return request(app)
+              .delete('/api/comments/1')
+              .expect(204);
+          });
+          it('DELETE status 404, returns an error message if a comment_id that does not exist', () => {
+            return request(app)
+              .delete('/api/comments/99')
+              .expect(404)
+              .then(({body}) => {
+                expect(body.msg).to.equal('Comment with Id 99 not found');
+              });
+          });
         });
       });
     });

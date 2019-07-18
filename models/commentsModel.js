@@ -57,3 +57,21 @@ exports.updateComment = (id, votes) => {
       });
   }
 };
+
+exports.deleteComment = id => {
+  return connection
+    .select('*')
+    .from('comments')
+    .where('comments.comment_id', id)
+    .delete()
+    .then(deleted => {
+      if (!deleted) {
+        return Promise.reject({
+          status: 404,
+          msg: `Comment with Id ${id} not found`
+        });
+      } else {
+        return 'Deleted';
+      }
+    });
+};
