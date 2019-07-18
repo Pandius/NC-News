@@ -2,8 +2,10 @@ process.env.NODE_ENV = 'test';
 const connection = require('../db/connection');
 const chai = require('chai');
 const {expect} = chai;
+const chaiSorted = require('chai-sorted');
 const app = require('../app.js');
 const request = require('supertest');
+chai.use(chaiSorted);
 
 describe('/*', () => {
   after(() => connection.destroy());
@@ -18,7 +20,7 @@ describe('/*', () => {
   });
   describe('/api', () => {
     it('Method not allowed: status 405 for /topics', () => {
-      const invalidMethods = ['patch', 'put', 'post', 'delete'];
+      const invalidMethods = ['patch', 'put', 'post', 'del'];
       const methodPromises = invalidMethods.map(method => {
         return request(app)
           [method]('/api')
@@ -78,6 +80,14 @@ describe('/*', () => {
         it(' GET status 404, for valid but non existing user', () => {
           return request(app)
             .get('/api/users/nousername')
+            .expect(404)
+            .then(({body}) => {
+              expect(body.msg).to.be.equal('user doesnt exists');
+            });
+        });
+        it(' GET status 400, for invalid username', () => {
+          return request(app)
+            .get('/api/users/99909')
             .expect(404)
             .then(({body}) => {
               expect(body.msg).to.be.equal('user doesnt exists');
@@ -199,6 +209,31 @@ describe('/*', () => {
             .expect(200)
             .then(({body}) => {
               expect(body.article[0].votes).to.eql(100);
+            });
+        });
+        it('GET status 200, responds with array of all comments for article by id', () => {
+          return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(({body}) => {
+              expect(body.comments).to.be.an('array');
+              expect(body.comments[0]).to.contain.keys(
+                'comment_id',
+                'body',
+                'article_id',
+                'author',
+                'votes',
+                'created_at'
+              );
+              expect(body.comments.length).to.equal(13);
+            });
+        });
+        it('GET Comments are sorted in descending order by created_at by default', () => {
+          return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(({body}) => {
+              expect(body.comments).to.be.descendingBy('created_at');
             });
         });
         it('POST status 201, returns an posted comment', () => {

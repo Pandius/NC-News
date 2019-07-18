@@ -5,7 +5,10 @@ const {
 } = require('../controllers/articlesController');
 const {MethodNotAllowed} = require('../errors/index');
 
-const {sendPostComment} = require('../controllers/commentsController');
+const {
+  sendPostComment,
+  sendAllComments
+} = require('../controllers/commentsController');
 
 articlesRouter
   .route('/:article_id')
@@ -15,6 +18,7 @@ articlesRouter
 articlesRouter
   .route('/:article_id/comments')
   .post(sendPostComment)
+  .get(sendAllComments)
   .all(MethodNotAllowed);
 
 module.exports = articlesRouter;
