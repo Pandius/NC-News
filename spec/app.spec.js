@@ -31,6 +31,14 @@ describe('/*', () => {
       });
       return Promise.all(methodPromises);
     });
+    it('GET status 200, returns a JSON file of all endpoints', () => {
+      return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({body}) => {
+          expect(body).to.be.an('object');
+        });
+    });
     describe('/topics', () => {
       it('GET status 200, returns an array of topics objects', () => {
         return request(app)
