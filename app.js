@@ -5,7 +5,8 @@ const {
   handleCustomErrors,
   handleSQLErrors,
   routeNotFound,
-  handleNotFoundSqlErrors
+  handleNotFoundSqlErrors,
+  handleServerErrors
 } = require('./errors/index');
 
 app.use(express.json());
@@ -15,5 +16,6 @@ app.use('/*', routeNotFound);
 app.use(handleSQLErrors);
 app.use(handleNotFoundSqlErrors);
 app.use(handleCustomErrors);
+app.use(handleServerErrors);
 
 module.exports = app;
