@@ -27,7 +27,7 @@ exports.updateArticle = (article_id, points) => {
       if (!article || !article.length) {
         return Promise.reject({status: 404, msg: 'article not found'});
       } else {
-        return article;
+        return article[0];
       }
     });
 };
