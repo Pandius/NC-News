@@ -1,7 +1,7 @@
 const connection = require('../db/connection');
 
 exports.fetchUserByUsername = username => {
-  if (/^[a-z]+$/i.test(username)) {
+  if (/^[a-z_-]+$/i.test(username)) {
     return connection
       .first('*')
       .from('users')

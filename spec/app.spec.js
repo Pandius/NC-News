@@ -66,10 +66,10 @@ describe('/*', () => {
       describe('/users/:username', () => {
         it(' GET status 200, returns an user by his username', () => {
           return request(app)
-            .get('/api/users/rogersop')
+            .get('/api/users/butter_bridge')
             .expect(200)
             .then(({body}) => {
-              expect(body.user.username).to.be.equal('rogersop');
+              expect(body.user.username).to.be.equal('butter_bridge');
               expect(body.user).to.have.keys('username', 'avatar_url', 'name');
             });
         });
@@ -87,7 +87,7 @@ describe('/*', () => {
         });
         it(' GET status 404, for valid but non existing user', () => {
           return request(app)
-            .get('/api/users/nousername')
+            .get('/api/users/no-user-name')
             .expect(404)
             .then(({body}) => {
               expect(body.msg).to.be.equal('user doesnt exists');
@@ -284,7 +284,7 @@ describe('/*', () => {
             .send({inc_votes: 1})
             .expect(200)
             .then(({body}) => {
-              expect(body.article[0]).to.contain.keys(
+              expect(body.article).to.contain.keys(
                 'article_id',
                 'title',
                 'body',
@@ -293,7 +293,7 @@ describe('/*', () => {
                 'author',
                 'created_at'
               );
-              expect(body.article[0].votes).to.equal(1);
+              expect(body.article.votes).to.equal(1);
             });
         });
         it('PATCH status 404, patching article with valid id  that doesnt exists', () => {
@@ -333,7 +333,7 @@ describe('/*', () => {
             .send({inc_votes: -40, pet: 'cat'})
             .expect(200)
             .then(({body}) => {
-              expect(body.article[0].votes).to.equal(60);
+              expect(body.article.votes).to.equal(60);
             });
         });
         it('PATCH responds with status code 200 and returns an unchanged article, when passed a vote object with an invalid key', () => {
@@ -344,10 +344,10 @@ describe('/*', () => {
             })
             .expect(200)
             .then(({body}) => {
-              expect(body.article[0].votes).to.eql(100);
+              expect(body.article.votes).to.eql(100);
             });
         });
-        it('GET status 200, responds with array of all comments for article by id', () => {
+        it('GET status 200, responds with array of all comments for article by id sorted by created_at by default', () => {
           return request(app)
             .get('/api/articles/1/comments')
             .expect(200)
@@ -362,14 +362,59 @@ describe('/*', () => {
                 'created_at'
               );
               expect(body.comments.length).to.equal(13);
+              expect(body.comments).to.be.descendingBy('created_at');
             });
         });
-        it('GET Comments are sorted in descending order by created_at by default', () => {
+
+        it('GET: status 200, returns an empty array if an article containing no comments is entered', () => {
           return request(app)
-            .get('/api/articles/1/comments')
+            .get('/api/articles/3/comments')
             .expect(200)
             .then(({body}) => {
-              expect(body.comments).to.be.descendingBy('created_at');
+              console.log(body);
+              expect(body.comments).to.eql([]);
+            });
+        });
+        it('GET: status 404, returns an error if a non-existent article is entered', () => {
+          return request(app)
+            .get('/api/articles/99/comments')
+            .expect(404)
+            .then(({body}) => {
+              expect(body.msg).to.equal('comments not found');
+            });
+        });
+        it('GET: status 400, returns an error if an invalid article is entered', () => {
+          return request(app)
+            .get('/api/articles/invalid/comments')
+            .expect(400)
+            .then(({body}) => {
+              expect(body.msg).to.equal(
+                'Bad request - Article ID must be an integer'
+              );
+            });
+        });
+        it('GET: status 200, displays all comments for specified article, sorting comments by the specified sort_by query when provided with a valid query', () => {
+          return request(app)
+            .get('/api/articles/1/comments?sort_by=author')
+            .expect(200)
+            .then(({body}) => {
+              expect(body.comments[0].author).to.equal('icellusedkars');
+            });
+        });
+        it('GET: status 200, displays all comments for specified article, sorting comments in the specified order when provided with a valid query', () => {
+          return request(app)
+            .get('/api/articles/1/comments?order=asc')
+            .expect(200)
+            .then(({body}) => {
+              expect(body.comments).to.be.ascendingBy('created_at');
+            });
+        });
+        it('GET: status 200, displays all comments for specified article, sorting comments by the specified column and in the specified order when provided with a valid query', () => {
+          return request(app)
+            .get('/api/articles/1/comments?sort_by=votes&order=asc')
+            .expect(200)
+            .then(({body}) => {
+              expect(body.comments).to.be.ascendingBy('votes');
             });
         });
         it('POST status 201, returns an posted comment', () => {
@@ -381,11 +426,11 @@ describe('/*', () => {
             })
             .expect(201)
             .then(({body}) => {
-              expect(body.comment[0].comment_id).to.equal(19);
-              expect(body.comment[0].author).to.equal('lurker');
-              expect(body.comment[0].article_id).to.equal(2);
-              expect(body.comment[0].votes).to.equal(0);
-              expect(body.comment[0].body).to.equal('this is new comment');
+              expect(body.comment.comment_id).to.equal(19);
+              expect(body.comment.author).to.equal('lurker');
+              expect(body.comment.article_id).to.equal(2);
+              expect(body.comment.votes).to.equal(0);
+              expect(body.comment.body).to.equal('this is new comment');
             });
         });
         it('POST status 400, empty object - nothing to post', () => {
