@@ -17,10 +17,29 @@ exports.sendPostComment = (req, res, next) => {
 
 exports.sendAllComments = (req, res, next) => {
   const {article_id} = req.params;
+  const {sort_by, order, ...restOfTheQuery} = req.query;
+  const validOrder = ['asc', 'desc'].includes(order);
+  const isInteger = /\d+/;
 
-  fetchComments(article_id)
+  if (isInteger.test(article_id) === false) {
+    return next({
+      status: 400,
+      msg: 'Bad request - Article ID must be an integer'
+    });
+  }
+  if (order && !validOrder) {
+    return next({
+      status: 400,
+      msg: 'Bad request - invalid order value'
+    });
+  }
+
+  fetchComments(article_id, sort_by, order)
     .then(comments => {
-      res.status(200).send({comments});
+      if (comments.hasOwnProperty('body')) {
+        comments = [];
+        res.status(200).send({comments});
+      } else res.status(200).send({comments});
     })
     .catch(next);
 };
