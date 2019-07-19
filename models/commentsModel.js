@@ -14,17 +14,17 @@ exports.postComment = (article_id, newComment) => {
       if (!comment || !comment.length) {
         return Promise.reject({status: 404, msg: 'comment not found'});
       } else {
-        return comment;
+        return comment[0];
       }
     });
 };
 
-exports.fetchComments = (article_id, sort_by) => {
+exports.fetchComments = (article_id, sort_by, order) => {
   return connection
     .select('*')
     .from('comments')
     .where('article_id', article_id)
-    .orderBy(sort_by || 'created_at', 'desc')
+    .orderBy(sort_by || 'created_at', order || 'desc')
     .then(comments => {
       if (!comments || !comments.length) {
         return Promise.reject({status: 404, msg: 'comments not found'});
