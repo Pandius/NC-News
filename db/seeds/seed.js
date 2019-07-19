@@ -15,12 +15,13 @@ exports.seed = function(connection) {
       const usersInsertions = connection('users')
         .insert(usersData)
         .returning('*');
-      return Promise.all([topicsInsertions, usersInsertions]).then(() => {
-        const formatedArticleDateData = formatDate(articlesData);
-        return connection('articles')
-          .insert(formatedArticleDateData)
-          .returning('*');
-      });
+      return Promise.all([topicsInsertions, usersInsertions]);
+    })
+    .then(() => {
+      const formatedArticleDateData = formatDate(articlesData);
+      return connection('articles')
+        .insert(formatedArticleDateData)
+        .returning('*');
     })
     .then(articleRows => {
       const articlesRef = makeRefObj(articleRows);
