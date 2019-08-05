@@ -205,6 +205,7 @@ describe('/*', () => {
           .get('/api/articles?sort_by=not-a-column')
           .expect(400)
           .then(({body}) => {
+            console.log(body);
             expect(body.msg).to.equal('invalid sort by value');
           });
       });
@@ -368,7 +369,7 @@ describe('/*', () => {
 
         it('GET: status 200, returns an empty array if an article containing no comments is entered', () => {
           return request(app)
-            .get('/api/articles/3/comments')
+            .get('/api/articles/2/comments')
             .expect(200)
             .then(({body}) => {
               console.log(body);
